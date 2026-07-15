@@ -264,5 +264,5 @@ body {
   100% { transform: translateX(-50%); }
 }
 .animate-marquee {
-  animation: marquee 70s linear infinite;
+  animation: marquee 180s linear infinite;
 }
