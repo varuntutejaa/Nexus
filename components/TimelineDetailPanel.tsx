@@ -62,6 +62,15 @@ export default function TimelineDetailPanel() {
               </button>
             </div>
 
+            <div className="mb-5 border-l-2 border-violet/30 pl-3">
+              <div className="text-[9px] tracking-widest text-lavender-dim">
+                FIELD NOTE — {timeline.discovered}
+              </div>
+              <p className="mt-0.5 text-xs italic leading-relaxed text-lavender/90">
+                &ldquo;{timeline.fieldNote}&rdquo;
+              </p>
+            </div>
+
             <div className="mb-5 grid grid-cols-3 gap-3">
               <Metric
                 label="Stability"
@@ -145,10 +154,6 @@ export default function TimelineDetailPanel() {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
-
-            <div className="mt-6 text-[10px] tracking-wider text-lavender-dim/70">
-              DISCOVERED: {timeline.discovered}
             </div>
           </motion.div>
         </>

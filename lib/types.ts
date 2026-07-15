@@ -24,6 +24,7 @@ export interface Timeline {
   depth: number;
   driftSpeed: number;
   discovered: string;
+  fieldNote: string;
 }
 
 export interface Anomaly {

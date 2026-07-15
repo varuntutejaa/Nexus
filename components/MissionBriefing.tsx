@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Orbit, Radar, ShieldCheck, Target, X } from "lucide-react";
+import { useSimulation } from "@/lib/simulation-context";
 
 export default function MissionBriefing({
   open,
@@ -10,6 +11,8 @@ export default function MissionBriefing({
   open: boolean;
   onClose: () => void;
 }) {
+  const { operatorName, cycleNumber } = useSimulation();
+
   return (
     <AnimatePresence>
       {open && (
@@ -47,6 +50,10 @@ export default function MissionBriefing({
                 >
                   <X className="h-5 w-5" />
                 </button>
+              </div>
+
+              <div className="mb-4 rounded-md border border-cyan/20 bg-cyan/5 px-3 py-2 font-mono-data text-[11px] text-cyan">
+                UPLINK ESTABLISHED — Operator {operatorName} · Continuum Cycle {cycleNumber}
               </div>
 
               <p className="mb-6 text-sm leading-relaxed text-lavender">

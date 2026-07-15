@@ -14,7 +14,7 @@ export default function Header({
   onCrisis: () => void;
   onMission: () => void;
 }) {
-  const { operatorName, overallStability, timelines, anomalies } = useSimulation();
+  const { operatorName, overallStability, timelines, anomalies, operatorRank } = useSimulation();
   const [now, setNow] = useState<Date | null>(() => new Date());
   const [ping, setPing] = useState(false);
   const prevAnomalyCount = useRef(anomalies.length);
@@ -106,7 +106,7 @@ export default function Header({
             {now ? formatClock(now) : "--:--:--"}
           </div>
           <div className="text-[10px] tracking-widest text-lavender-dim">
-            OPERATOR: {operatorName}
+            {operatorName} <span className="text-violet">· {operatorRank.title}</span>
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ import type {
   StabilityStatus,
   Timeline,
 } from "./types";
+import { FIELD_NOTES } from "./lore";
 
 let idCounter = 1;
 function nextId(prefix: string) {
@@ -166,6 +167,7 @@ export function generateTimeline(index: number): Timeline {
     depth,
     driftSpeed: rand(0.15, 0.5),
     discovered: `Cycle ${randInt(1, 9999)}`,
+    fieldNote: pick(FIELD_NOTES),
   };
 }
 

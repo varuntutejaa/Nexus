@@ -16,7 +16,7 @@ const ACTION_ICONS: Record<ActionType, typeof Wrench> = {
 };
 
 export default function StabilizationConsole() {
-  const { timelines, performAction, actionLog } = useSimulation();
+  const { timelines, performAction, actionLog, operatorRank, nextRank } = useSimulation();
   const [timelineId, setTimelineId] = useState<string>("");
   const [action, setAction] = useState<ActionType>("patch");
   const [intensity, setIntensity] = useState(50);
@@ -171,7 +171,24 @@ export default function StabilizationConsole() {
         </div>
 
         <div className="panel p-4">
-          <div className="mb-2 text-[10px] tracking-widest text-lavender-dim">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <div className="text-[9px] tracking-widest text-lavender-dim">
+                CONTINUUM CLEARANCE
+              </div>
+              <div className="font-display text-sm font-semibold text-violet">
+                {operatorRank.title}
+              </div>
+            </div>
+            {nextRank && (
+              <div className="text-right text-[10px] text-lavender-dim">
+                {nextRank.threshold - actionLog.length} action
+                {nextRank.threshold - actionLog.length === 1 ? "" : "s"} to{" "}
+                <span className="text-lavender">{nextRank.title}</span>
+              </div>
+            )}
+          </div>
+          <div className="mb-3 text-[10px] tracking-widest text-lavender-dim">
             RECENT ACTION LOG
           </div>
           <div className="max-h-40 space-y-1.5 overflow-y-auto pr-1">

@@ -25,6 +25,7 @@ import {
   rand,
   randInt,
 } from "./mock-data";
+import { RANKS, rankForActionCount, type RankTier } from "./lore";
 
 const MAX_ANOMALIES = 60;
 const MAX_TREND_POINTS = 40;
@@ -50,6 +51,9 @@ interface SimulationState {
   crisisTimelineId: string | null;
   crisisDismissedAt: number;
   actionsToday: number;
+  cycleNumber: number;
+  operatorRank: RankTier;
+  nextRank: RankTier | null;
 }
 
 interface SimulationContextValue extends SimulationState {
@@ -87,6 +91,7 @@ export function SimulationProvider({
   const [crisisDismissedAt, setCrisisDismissedAt] = useState(0);
   const tRef = useRef(0);
   const mountedAtRef = useRef<number | null>(null);
+  const [cycleNumber] = useState(() => randInt(1000, 9999));
 
   useEffect(() => {
     mountedAtRef.current = Date.now();
@@ -215,6 +220,12 @@ export function SimulationProvider({
     return actionLog.filter((a) => a.timestamp >= startOfDay.getTime()).length;
   }, [actionLog]);
 
+  const operatorRank = useMemo(() => rankForActionCount(actionLog.length), [actionLog.length]);
+  const nextRank = useMemo(() => {
+    const idx = RANKS.findIndex((r) => r.title === operatorRank.title);
+    return idx >= 0 && idx < RANKS.length - 1 ? RANKS[idx + 1] : null;
+  }, [operatorRank]);
+
   const value: SimulationContextValue = {
     operatorName,
     timelines,
@@ -226,6 +237,9 @@ export function SimulationProvider({
     crisisTimelineId,
     crisisDismissedAt,
     actionsToday,
+    cycleNumber,
+    operatorRank,
+    nextRank,
     selectTimeline,
     performAction,
     triggerCrisis,

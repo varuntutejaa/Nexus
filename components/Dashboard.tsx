@@ -13,6 +13,8 @@ import TimelineDetailPanel from "./TimelineDetailPanel";
 import CrisisMode from "./CrisisMode";
 import MissionBriefing from "./MissionBriefing";
 import RealityGlitch from "./RealityGlitch";
+import ContinuumTicker from "./ContinuumTicker";
+import RankUpToast from "./RankUpToast";
 
 function DashboardContent() {
   const [tab, setTab] = useState<Tab>("overview");
@@ -34,8 +36,10 @@ function DashboardContent() {
   return (
     <div className="relative z-10 flex min-h-screen flex-col">
       <RealityGlitch />
+      <RankUpToast />
       <MissionBriefing open={missionOpen} onClose={() => setMissionOpen(false)} />
       <Header onCrisis={() => triggerCrisis()} onMission={() => setMissionOpen(true)} />
+      <ContinuumTicker />
 
       <div className="flex flex-1 flex-col gap-0 p-4 md:flex-row md:gap-4">
         <Sidebar active={tab} onChange={setTab} />
