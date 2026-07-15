@@ -32,8 +32,9 @@ export default function StatCard({
     <motion.div
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -3, transition: { duration: 0.2 } }}
       transition={{ duration: 0.45, delay, ease: "easeOut" }}
-      className="panel flex items-center gap-4 p-4"
+      className="panel flex items-center gap-4 p-4 transition-shadow hover:glow-violet"
     >
       <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${accentMap[accent]}`}>
         <Icon className="h-5 w-5" />
