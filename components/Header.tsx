@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, BookOpen, Radio, Search } from "lucide-react";
+import { AlertTriangle, AudioWaveform, BookOpen, Radio, Search, Volume2, VolumeX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import AnimatedNumber from "./AnimatedNumber";
+import RadialGauge from "./RadialGauge";
 import { formatClock, STATUS_COLORS } from "@/lib/format";
 import { useSimulation } from "@/lib/simulation-context";
 import NotificationBell from "./NotificationBell";
+import HudCorners from "./HudCorners";
 
 export default function Header({
   onCrisis,
@@ -17,8 +19,18 @@ export default function Header({
   onMission: () => void;
   onSearch: () => void;
 }) {
-  const { operatorName, overallStability, timelines, anomalies, operatorRank, selectTimeline } =
-    useSimulation();
+  const {
+    operatorName,
+    overallStability,
+    timelines,
+    anomalies,
+    operatorRank,
+    selectTimeline,
+    soundEnabled,
+    ambientEnabled,
+    toggleSound,
+    toggleAmbient,
+  } = useSimulation();
   const [now, setNow] = useState<Date | null>(() => new Date());
   const [ping, setPing] = useState(false);
   const prevAnomalyCount = useRef(anomalies.length);
@@ -44,7 +56,8 @@ export default function Header({
   const criticalCount = timelines.filter((t) => t.status === "critical").length;
 
   return (
-    <header className="panel relative z-20 mx-4 mt-4 flex flex-wrap items-center justify-between gap-4 px-5 py-3">
+    <header className="panel hud-corners relative z-20 mx-4 mt-4 flex flex-wrap items-center justify-between gap-4 px-5 py-3">
+      <HudCorners />
       <div className="flex items-center gap-3">
         <button
           onClick={onMission}
@@ -70,7 +83,7 @@ export default function Header({
         </button>
       </div>
 
-      <div className="relative flex items-center gap-2">
+      <div className="relative flex items-center gap-3">
         <AnimatePresence>
           {ping && (
             <motion.span
@@ -82,16 +95,46 @@ export default function Header({
             />
           )}
         </AnimatePresence>
-        <Radio className="h-3.5 w-3.5 text-cyan animate-pulse-soft" />
-        <span className="font-mono-data text-[11px] tracking-wider text-lavender-dim">
-          MULTIVERSE STABILITY
-        </span>
-        <span className={`font-mono-data text-lg font-semibold ${colors.text}`}>
-          <AnimatedNumber value={overallStability} decimals={1} suffix="%" />
-        </span>
+        <RadialGauge value={overallStability} size={40} strokeWidth={3} color={colors.hex} showValue={false} ticks={false} />
+        <div>
+          <div className="flex items-center gap-1.5">
+            <Radio className="h-3 w-3 text-cyan animate-pulse-soft" />
+            <span className="font-mono-data text-[10px] tracking-wider text-lavender-dim">
+              MULTIVERSE STABILITY
+            </span>
+          </div>
+          <span className={`font-hud text-lg font-bold ${colors.text}`}>
+            <AnimatedNumber value={overallStability} decimals={1} suffix="%" />
+          </span>
+        </div>
       </div>
 
       <div className="flex items-center gap-3">
+        <div className="hidden items-center gap-1 md:flex">
+          <button
+            onClick={toggleSound}
+            title={soundEnabled ? "Mute SFX" : "Unmute SFX"}
+            className={`flex h-8 w-8 items-center justify-center rounded-md border transition cursor-pointer ${
+              soundEnabled
+                ? "border-cyan/50 text-cyan"
+                : "border-white/10 text-lavender-dim hover:border-cyan/30 hover:text-white"
+            }`}
+          >
+            {soundEnabled ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+          </button>
+          <button
+            onClick={toggleAmbient}
+            title={ambientEnabled ? "Stop ambient hum" : "Play ambient hum"}
+            className={`flex h-8 w-8 items-center justify-center rounded-md border transition cursor-pointer ${
+              ambientEnabled
+                ? "border-cyan/50 text-cyan"
+                : "border-white/10 text-lavender-dim hover:border-cyan/30 hover:text-white"
+            }`}
+          >
+            <AudioWaveform className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
         <button
           onClick={onSearch}
           className="hidden items-center gap-2 rounded-md border border-white/10 px-2.5 py-1.5 text-[10px] tracking-widest text-lavender-dim transition hover:border-violet/40 hover:text-white cursor-pointer md:flex"

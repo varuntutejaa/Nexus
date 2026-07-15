@@ -12,21 +12,39 @@ const LEGEND: { status: StabilityStatus; label: string }[] = [
   { status: "critical", label: "Critical" },
 ];
 
-function hash(str: string, seed: number) {
-  let h = seed;
-  for (let i = 0; i < str.length; i++) {
-    h = (Math.imul(h ^ str.charCodeAt(i), 2654435761) >>> 0);
-  }
-  return ((h % 1000) / 1000) * 2 - 1;
-}
-
 const CENTER = 500;
+const MAX_R = 460;
+const RING_FRACTIONS = [0.25, 0.5, 0.75, 1];
 
 function nodePosition(tl: Timeline) {
-  const r = tl.radius * 460;
+  const r = tl.radius * MAX_R;
   const x = CENTER + r * Math.cos(tl.angle);
   const y = CENTER + r * Math.sin(tl.angle);
   return { x, y };
+}
+
+function polar(angleDeg: number, r: number) {
+  const rad = (angleDeg * Math.PI) / 180;
+  return { x: CENTER + r * Math.cos(rad), y: CENTER + r * Math.sin(rad) };
+}
+
+function sweepWedgePath(halfAngle = 16, r = MAX_R + 20) {
+  const a = polar(-halfAngle, r);
+  const b = polar(halfAngle, r);
+  return `M ${CENTER} ${CENTER} L ${a.x} ${a.y} A ${r} ${r} 0 0 1 ${b.x} ${b.y} Z`;
+}
+
+function TravelingPulse({ x, y, color }: { x: number; y: number; color: string }) {
+  return (
+    <motion.circle
+      r={3}
+      fill={color}
+      initial={{ cx: CENTER, cy: CENTER, opacity: 0 }}
+      animate={{ cx: [CENTER, x], cy: [CENTER, y], opacity: [0, 1, 1, 0] }}
+      transition={{ duration: 1.6, repeat: Infinity, ease: "linear" }}
+      style={{ filter: `drop-shadow(0 0 4px ${color})` }}
+    />
+  );
 }
 
 export default function MultiverseMap({ compact = false }: { compact?: boolean }) {
@@ -38,10 +56,7 @@ export default function MultiverseMap({ compact = false }: { compact?: boolean }
     () =>
       timelines.map((tl) => {
         const { x, y } = nodePosition(tl);
-        const dx = hash(tl.id, 17) * (14 + tl.depth * 2);
-        const dy = hash(tl.id, 91) * (14 + tl.depth * 2);
-        const duration = 8 + tl.driftSpeed * 22;
-        return { tl, x, y, dx, dy, duration };
+        return { tl, x, y };
       }),
     [timelines]
   );
@@ -51,17 +66,43 @@ export default function MultiverseMap({ compact = false }: { compact?: boolean }
       <svg viewBox="0 0 1000 1000" className="h-full w-full overflow-visible">
         <defs>
           <radialGradient id="nexusGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#c7c2e6" stopOpacity={0.9} />
-            <stop offset="35%" stopColor="#8b5cf6" stopOpacity={0.5} />
-            <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+            <stop offset="0%" stopColor="#F2F6FA" stopOpacity={0.9} />
+            <stop offset="35%" stopColor="#00D9FF" stopOpacity={0.45} />
+            <stop offset="100%" stopColor="#00D9FF" stopOpacity={0} />
           </radialGradient>
+          <linearGradient id="sweepFade" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#00D9FF" stopOpacity={0} />
+            <stop offset="100%" stopColor="#00D9FF" stopOpacity={0.14} />
+          </linearGradient>
         </defs>
+
+        {/* orbital rings */}
+        {RING_FRACTIONS.map((f) => (
+          <circle
+            key={f}
+            cx={CENTER}
+            cy={CENTER}
+            r={MAX_R * f}
+            fill="none"
+            stroke="rgba(0,217,255,0.14)"
+            strokeWidth={1}
+            strokeDasharray={f === 1 ? undefined : "2 6"}
+          />
+        ))}
+
+        {/* radar sweep */}
+        <g
+          className="animate-radar-sweep"
+          style={{ transformBox: "view-box", transformOrigin: `${CENTER}px ${CENTER}px` }}
+        >
+          <path d={sweepWedgePath()} fill="url(#sweepFade)" />
+        </g>
 
         {/* branch lines */}
         {positioned.map(({ tl, x, y }) => {
           const colors = STATUS_COLORS[tl.status];
           const dimmed = filter !== "all" && tl.status !== filter;
-          const baseOpacity = tl.status === "critical" ? 0.35 : 0.14;
+          const baseOpacity = tl.status === "critical" ? 0.4 : 0.16;
           return (
             <line
               key={`line-${tl.id}`}
@@ -70,30 +111,30 @@ export default function MultiverseMap({ compact = false }: { compact?: boolean }
               x2={x}
               y2={y}
               stroke={colors.hex}
-              strokeWidth={tl.status === "critical" ? 1.4 : 0.8}
+              strokeWidth={tl.status === "critical" ? 1.4 : 0.7}
               strokeOpacity={dimmed ? baseOpacity * 0.25 : baseOpacity}
-              strokeDasharray={tl.status === "atrisk" ? "4 5" : undefined}
             />
           );
         })}
 
+        {/* traveling light pulse — critical connectors only */}
+        {positioned
+          .filter(({ tl }) => tl.status === "critical" && (filter === "all" || filter === "critical"))
+          .map(({ tl, x, y }) => (
+            <TravelingPulse key={`pulse-${tl.id}`} x={x} y={y} color={STATUS_COLORS.critical.hex} />
+          ))}
+
         {/* central nexus */}
         <circle cx={CENTER} cy={CENTER} r={70} fill="url(#nexusGlow)" />
-        <circle
-          cx={CENTER}
-          cy={CENTER}
-          r={22}
-          fill="#c7c2e6"
-          className="animate-pulse-soft"
-          style={{ transformBox: "fill-box", transformOrigin: "center" }}
-        />
-        <circle cx={CENTER} cy={CENTER} r={22} fill="none" stroke="#8b5cf6" strokeWidth={1.5} />
+        <circle cx={CENTER} cy={CENTER} r={20} fill="#F2F6FA" />
+        <circle cx={CENTER} cy={CENTER} r={20} fill="none" stroke="#00D9FF" strokeWidth={1.5} />
+        <circle cx={CENTER} cy={CENTER} r={30} fill="none" stroke="#00D9FF" strokeWidth={1} opacity={0.4} />
         {!compact && (
           <text
             x={CENTER}
             y={CENTER + 46}
             textAnchor="middle"
-            className="fill-white font-display"
+            className="fill-white font-hud"
             fontSize={13}
             letterSpacing={3}
           >
@@ -102,28 +143,25 @@ export default function MultiverseMap({ compact = false }: { compact?: boolean }
         )}
 
         {/* nodes */}
-        {positioned.map(({ tl, x, y, dx, dy, duration }) => {
+        {positioned.map(({ tl, x, y }) => {
           const colors = STATUS_COLORS[tl.status];
           const isSelected = tl.id === selectedTimelineId;
           const isHovered = tl.id === hoveredId;
           const baseR = compact ? 5 + tl.depth * 0.6 : 6 + tl.depth * 0.8;
           const dimmed = filter !== "all" && tl.status !== filter;
+          const isCritical = tl.status === "critical";
           return (
             <motion.g
               key={tl.id}
               initial={{ opacity: 1 }}
-              animate={{ x: [0, dx, 0], y: [0, dy, 0], opacity: dimmed ? 0.18 : 1 }}
-              transition={{
-                x: { duration, repeat: Infinity, ease: "easeInOut" },
-                y: { duration, repeat: Infinity, ease: "easeInOut" },
-                opacity: { duration: 0.3 },
-              }}
+              animate={{ opacity: dimmed ? 0.18 : 1 }}
+              transition={{ duration: 0.3 }}
               style={{ cursor: "pointer" }}
               onClick={() => selectTimeline(tl.id)}
               onMouseEnter={() => setHoveredId(tl.id)}
               onMouseLeave={() => setHoveredId(null)}
             >
-              {tl.status === "critical" && (
+              {isCritical && (
                 <circle
                   cx={x}
                   cy={y}
@@ -141,10 +179,7 @@ export default function MultiverseMap({ compact = false }: { compact?: boolean }
                 cy={y}
                 r={baseR}
                 fill={colors.hex}
-                className={tl.status !== "critical" ? "animate-pulse-soft" : ""}
                 style={{
-                  transformBox: "fill-box",
-                  transformOrigin: "center",
                   filter: `drop-shadow(0 0 ${isHovered || isSelected ? 10 : 5}px ${colors.hex})`,
                 }}
               />
@@ -166,9 +201,9 @@ export default function MultiverseMap({ compact = false }: { compact?: boolean }
                     y={y - 16}
                     width={Math.max(120, tl.name.length * 6.5)}
                     height={32}
-                    rx={6}
-                    fill="#0f0c1f"
-                    stroke="rgba(139,92,246,0.4)"
+                    rx={4}
+                    fill="#0a1628"
+                    stroke="rgba(0,217,255,0.4)"
                   />
                   <text
                     x={x + baseR + 16}

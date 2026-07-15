@@ -86,7 +86,7 @@ export default function LoginScreen({
             whileTap={{ scale: 0.97 }}
             type="submit"
             disabled={authenticating}
-            className="relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-md bg-gradient-to-r from-violet to-cyan py-2.5 text-sm font-semibold text-void transition disabled:opacity-70"
+            className="relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-md bg-gradient-to-r from-deep-blue to-cyan py-2.5 text-sm font-semibold text-void transition disabled:opacity-70"
           >
             {authenticating ? (
               <motion.span

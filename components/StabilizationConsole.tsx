@@ -4,10 +4,11 @@ import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, GitMerge, ShieldAlert, Sliders, Wrench, Zap } from "lucide-react";
 import { useSimulation } from "@/lib/simulation-context";
-import { STATUS_COLORS } from "@/lib/format";
+import { STATUS_COLORS, TEAL_SUCCESS } from "@/lib/format";
 import { formatTimeAgo } from "@/lib/format";
 import { ACTION_LABELS } from "@/lib/mock-data";
 import type { ActionType } from "@/lib/types";
+import HudCorners from "./HudCorners";
 
 const ACTION_ICONS: Record<ActionType, typeof Wrench> = {
   patch: Wrench,
@@ -44,7 +45,8 @@ export default function StabilizationConsole() {
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.1fr]">
-      <div className="panel p-4">
+      <div className="panel hud-corners relative p-4">
+        <HudCorners />
         <div className="mb-3 flex items-center gap-2">
           <Zap className="h-4 w-4 text-violet" />
           <h3 className="font-display text-sm font-semibold text-white">Select Timeline</h3>
@@ -80,7 +82,8 @@ export default function StabilizationConsole() {
       </div>
 
       <div className="space-y-4">
-        <div className="panel p-4">
+        <div className="panel hud-corners relative p-4">
+          <HudCorners />
           <div className="mb-3 flex items-center gap-2">
             <Sliders className="h-4 w-4 text-cyan" />
             <h3 className="font-display text-sm font-semibold text-white">
@@ -126,20 +129,22 @@ export default function StabilizationConsole() {
                 label="Intervention Intensity"
                 value={intensity}
                 onChange={setIntensity}
-                color="#8b5cf6"
+                color="#00D9FF"
               />
               <SliderField
                 label="Containment Radius"
                 value={radius}
                 onChange={setRadius}
-                color="#22d3ee"
+                color="#1E5FFF"
               />
 
               <motion.button
                 whileTap={{ scale: 0.97 }}
+                animate={confirming ? { boxShadow: ["0 0 0px rgba(0,217,255,0)", "0 0 24px rgba(0,217,255,0.6)", "0 0 0px rgba(0,217,255,0)"] } : {}}
+                transition={confirming ? { duration: 0.9, repeat: Infinity } : {}}
                 onClick={handleConfirm}
                 disabled={confirming}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-md bg-gradient-to-r from-violet to-cyan py-2.5 text-sm font-semibold text-void transition disabled:opacity-70 cursor-pointer"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-md bg-gradient-to-r from-deep-blue to-cyan py-2.5 text-sm font-semibold text-void transition disabled:opacity-90 cursor-pointer"
               >
                 {confirming ? (
                   <motion.span
@@ -150,7 +155,7 @@ export default function StabilizationConsole() {
                 ) : (
                   <Zap className="h-4 w-4" />
                 )}
-                {confirming ? "APPLYING INTERVENTION..." : "CONFIRM ACTION"}
+                {confirming ? "PROCESSING..." : "CONFIRM ACTION"}
               </motion.button>
 
               <AnimatePresence>
@@ -159,7 +164,7 @@ export default function StabilizationConsole() {
                     initial={{ opacity: 0, scale: 0.9, y: 6 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
-                    className="mt-3 flex items-center gap-2 rounded-md border border-cyan/30 bg-cyan/10 px-3 py-2 text-xs text-cyan"
+                    className={`mt-3 flex items-center gap-2 rounded-md border ${TEAL_SUCCESS.border} ${TEAL_SUCCESS.bg} px-3 py-2 text-xs ${TEAL_SUCCESS.text}`}
                   >
                     <CheckCircle2 className="h-4 w-4" />
                     Stabilization action applied successfully.
@@ -170,7 +175,8 @@ export default function StabilizationConsole() {
           )}
         </div>
 
-        <div className="panel p-4">
+        <div className="panel hud-corners relative p-4">
+          <HudCorners />
           <div className="mb-3 flex items-center justify-between">
             <div>
               <div className="text-[9px] tracking-widest text-lavender-dim">

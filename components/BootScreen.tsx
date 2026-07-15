@@ -81,7 +81,7 @@ export default function BootScreen({ onComplete }: { onComplete: () => void }) {
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
             <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-violet to-cyan"
+              className="h-full rounded-full bg-gradient-to-r from-deep-blue to-cyan"
               style={{ width: `${Math.min(100, progress)}%` }}
             />
           </div>

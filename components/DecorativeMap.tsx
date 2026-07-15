@@ -41,9 +41,9 @@ export default function DecorativeMap() {
     <svg viewBox="0 0 1000 1000" className="h-full w-full overflow-visible" aria-hidden>
       <defs>
         <radialGradient id="landingNexusGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#c7c2e6" stopOpacity={0.85} />
-          <stop offset="35%" stopColor="#8b5cf6" stopOpacity={0.4} />
-          <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+          <stop offset="0%" stopColor="#F2F6FA" stopOpacity={0.85} />
+          <stop offset="35%" stopColor="#00D9FF" stopOpacity={0.4} />
+          <stop offset="100%" stopColor="#00D9FF" stopOpacity={0} />
         </radialGradient>
       </defs>
 
@@ -64,14 +64,8 @@ export default function DecorativeMap() {
       })}
 
       <circle cx={CENTER} cy={CENTER} r={80} fill="url(#landingNexusGlow)" />
-      <circle
-        cx={CENTER}
-        cy={CENTER}
-        r={20}
-        fill="#c7c2e6"
-        className="animate-pulse-soft"
-        style={{ transformBox: "fill-box", transformOrigin: "center" }}
-      />
+      <circle cx={CENTER} cy={CENTER} r={20} fill="#F2F6FA" />
+      <circle cx={CENTER} cy={CENTER} r={20} fill="none" stroke="#00D9FF" strokeWidth={1.5} />
 
       {positioned.map(({ tl, x, y, dx, dy, duration }) => {
         const colors = STATUS_COLORS[tl.status];
@@ -88,7 +82,7 @@ export default function DecorativeMap() {
               r={r}
               fill={colors.hex}
               opacity={0.7}
-              className={tl.status !== "critical" ? "animate-pulse-soft" : ""}
+              className={tl.status === "critical" ? "animate-pulse-crit" : ""}
               style={{
                 transformBox: "fill-box",
                 transformOrigin: "center",

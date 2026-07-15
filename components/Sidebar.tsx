@@ -28,17 +28,18 @@ export default function Sidebar({
           <button
             key={id}
             onClick={() => onChange(id)}
-            className={`relative flex shrink-0 items-center gap-2.5 rounded-md px-3 py-2.5 text-left text-xs font-medium tracking-wide transition cursor-pointer ${
+            className={`relative flex shrink-0 items-center gap-2.5 rounded-md border-l-2 border-transparent px-3 py-2.5 text-left text-xs font-medium tracking-wide transition cursor-pointer ${
               isActive
-                ? "text-white"
+                ? "bg-cyan/5 text-white"
                 : "text-lavender-dim hover:bg-white/5 hover:text-lavender"
             }`}
           >
             {isActive && (
               <motion.span
-                layoutId="sidebar-active-pill"
+                layoutId="sidebar-active-bar"
                 transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                className="glow-violet absolute inset-0 rounded-md bg-violet/20"
+                className="absolute -left-0.5 top-1 bottom-1 w-0.5 rounded-full bg-cyan"
+                style={{ boxShadow: "0 0 8px 1px rgba(0,217,255,0.7)" }}
               />
             )}
             <Icon className="relative z-10 h-4 w-4 shrink-0" />

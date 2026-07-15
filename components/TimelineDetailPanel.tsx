@@ -4,9 +4,10 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Wrench, ShieldAlert, GitMerge, CheckCircle2, Users, Activity } from "lucide-react";
 import { useSimulation } from "@/lib/simulation-context";
-import { STATUS_COLORS } from "@/lib/format";
+import { STATUS_COLORS, TEAL_SUCCESS } from "@/lib/format";
 import { formatPopulation } from "@/lib/format";
 import StabilityTrendChart from "./StabilityTrendChart";
+import HudCorners from "./HudCorners";
 import type { ActionType } from "@/lib/types";
 
 const ACTIONS: { type: ActionType; label: string; icon: typeof Wrench; hint: string }[] = [
@@ -18,13 +19,18 @@ const ACTIONS: { type: ActionType; label: string; icon: typeof Wrench; hint: str
 export default function TimelineDetailPanel() {
   const { selectedTimelineId, selectTimeline, getTimeline, performAction } = useSimulation();
   const [flash, setFlash] = useState<ActionType | null>(null);
+  const [pending, setPending] = useState<ActionType | null>(null);
   const timeline = getTimeline(selectedTimelineId);
 
   function handleAction(action: ActionType) {
-    if (!timeline) return;
-    performAction(timeline.id, action, 32);
-    setFlash(action);
-    setTimeout(() => setFlash(null), 1600);
+    if (!timeline || pending) return;
+    setPending(action);
+    setTimeout(() => {
+      performAction(timeline.id, action, 32);
+      setPending(null);
+      setFlash(action);
+      setTimeout(() => setFlash(null), 1600);
+    }, 700);
   }
 
   return (
@@ -43,8 +49,9 @@ export default function TimelineDetailPanel() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 260 }}
-            className="fixed right-0 top-0 z-50 h-full w-full max-w-md overflow-y-auto border-l border-violet/20 bg-void-raised p-6"
+            className="hud-corners fixed right-0 top-0 z-50 h-full w-full max-w-md overflow-y-auto border-l border-violet/20 bg-void-raised p-6"
           >
+            <HudCorners />
             <div className="mb-5 flex items-start justify-between">
               <div>
                 <div className="font-mono-data text-[11px] tracking-widest text-lavender-dim">
@@ -89,7 +96,8 @@ export default function TimelineDetailPanel() {
               />
             </div>
 
-            <div className="panel mb-5 p-3">
+            <div className="panel hud-corners relative mb-5 p-3">
+              <HudCorners />
               <div className="mb-2 text-[10px] tracking-widest text-lavender-dim">
                 STABILITY — LAST 24 CYCLES
               </div>
@@ -128,17 +136,41 @@ export default function TimelineDetailPanel() {
                 STABILIZATION ACTIONS
               </div>
               <div className="grid grid-cols-3 gap-2">
-                {ACTIONS.map(({ type, label, icon: Icon }) => (
-                  <motion.button
-                    key={type}
-                    whileTap={{ scale: 0.94 }}
-                    onClick={() => handleAction(type)}
-                    className="flex flex-col items-center gap-1.5 rounded-md border border-violet/25 bg-violet/5 py-3 text-[11px] text-lavender transition hover:border-violet/60 hover:bg-violet/15 hover:text-white cursor-pointer"
-                  >
-                    <Icon className="h-4 w-4" />
-                    {label}
-                  </motion.button>
-                ))}
+                {ACTIONS.map(({ type, label, icon: Icon }) => {
+                  const isPending = pending === type;
+                  return (
+                    <motion.button
+                      key={type}
+                      whileTap={{ scale: 0.94 }}
+                      animate={
+                        isPending
+                          ? {
+                              boxShadow: [
+                                "0 0 0px rgba(0,217,255,0)",
+                                "0 0 18px rgba(0,217,255,0.55)",
+                                "0 0 0px rgba(0,217,255,0)",
+                              ],
+                            }
+                          : {}
+                      }
+                      transition={isPending ? { duration: 0.8, repeat: Infinity } : {}}
+                      onClick={() => handleAction(type)}
+                      disabled={pending !== null}
+                      className="flex flex-col items-center gap-1.5 rounded-md border border-violet/25 bg-violet/5 py-3 text-[11px] text-lavender transition hover:border-violet/60 hover:bg-violet/15 hover:text-white disabled:opacity-70 cursor-pointer"
+                    >
+                      {isPending ? (
+                        <motion.span
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 0.7, repeat: Infinity, ease: "linear" }}
+                          className="h-4 w-4 rounded-full border-2 border-cyan/30 border-t-cyan"
+                        />
+                      ) : (
+                        <Icon className="h-4 w-4" />
+                      )}
+                      {isPending ? "Processing..." : label}
+                    </motion.button>
+                  );
+                })}
               </div>
 
               <AnimatePresence>
@@ -147,7 +179,7 @@ export default function TimelineDetailPanel() {
                     initial={{ opacity: 0, y: 8, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -8 }}
-                    className="mt-3 flex items-center gap-2 rounded-md border border-cyan/30 bg-cyan/10 px-3 py-2 text-xs text-cyan"
+                    className={`mt-3 flex items-center gap-2 rounded-md border ${TEAL_SUCCESS.border} ${TEAL_SUCCESS.bg} px-3 py-2 text-xs ${TEAL_SUCCESS.text}`}
                   >
                     <CheckCircle2 className="h-4 w-4" />
                     Action complete — stability response registered.

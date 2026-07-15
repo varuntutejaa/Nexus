@@ -12,10 +12,10 @@ import StabilizationConsole from "./StabilizationConsole";
 import TimelineDetailPanel from "./TimelineDetailPanel";
 import CrisisMode from "./CrisisMode";
 import MissionBriefing from "./MissionBriefing";
-import RealityGlitch from "./RealityGlitch";
 import ContinuumTicker from "./ContinuumTicker";
 import RankUpToast from "./RankUpToast";
 import CommandPalette from "./CommandPalette";
+import HudCorners from "./HudCorners";
 
 function DashboardContent() {
   const [tab, setTab] = useState<Tab>("overview");
@@ -43,7 +43,6 @@ function DashboardContent() {
 
   return (
     <div className="relative z-10 flex min-h-screen flex-col">
-      <RealityGlitch />
       <RankUpToast />
       <MissionBriefing open={missionOpen} onClose={() => setMissionOpen(false)} />
       <CommandPalette
@@ -74,7 +73,8 @@ function DashboardContent() {
             >
               {tab === "overview" && <OverviewTab onNavigate={setTab} />}
               {tab === "map" && (
-                <div className="panel p-6">
+                <div className="panel hud-corners relative p-6">
+                  <HudCorners />
                   <div className="mb-4 text-center">
                     <div className="font-display text-lg font-semibold text-white">
                       Multiverse Map

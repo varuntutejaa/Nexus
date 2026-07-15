@@ -26,6 +26,7 @@ import {
   randInt,
 } from "./mock-data";
 import { RANKS, rankForActionCount, type RankTier } from "./lore";
+import { playBlip, playCriticalTone, startAmbientHum, stopAmbientHum } from "./sound";
 
 const MAX_ANOMALIES = 60;
 const MAX_TREND_POINTS = 40;
@@ -54,6 +55,8 @@ interface SimulationState {
   cycleNumber: number;
   operatorRank: RankTier;
   nextRank: RankTier | null;
+  soundEnabled: boolean;
+  ambientEnabled: boolean;
 }
 
 interface SimulationContextValue extends SimulationState {
@@ -62,6 +65,8 @@ interface SimulationContextValue extends SimulationState {
   triggerCrisis: (timelineId?: string) => void;
   dismissCrisis: () => void;
   getTimeline: (id: string | null) => Timeline | undefined;
+  toggleSound: () => void;
+  toggleAmbient: () => void;
 }
 
 const SimulationContext = createContext<SimulationContextValue | null>(null);
@@ -92,10 +97,23 @@ export function SimulationProvider({
   const tRef = useRef(0);
   const mountedAtRef = useRef<number | null>(null);
   const [cycleNumber] = useState(() => randInt(1000, 9999));
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [ambientEnabled, setAmbientEnabled] = useState(false);
+  const soundEnabledRef = useRef(soundEnabled);
+
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+  }, [soundEnabled]);
 
   useEffect(() => {
     mountedAtRef.current = Date.now();
   }, []);
+
+  useEffect(() => {
+    if (ambientEnabled) startAmbientHum();
+    else stopAmbientHum();
+    return () => stopAmbientHum();
+  }, [ambientEnabled]);
 
   const overallStability = useMemo(() => {
     if (timelines.length === 0) return 0;
@@ -138,6 +156,10 @@ export function SimulationProvider({
       if (Math.random() > 0.55) return;
       setAnomalies((prev) => {
         const anomaly = generateAnomaly(timelines);
+        if (soundEnabledRef.current) {
+          if (anomaly.severity === "critical") playCriticalTone();
+          else playBlip(anomaly.severity === "high" ? 660 : 880);
+        }
         return [anomaly, ...prev].slice(0, MAX_ANOMALIES);
       });
     }, 3400);
@@ -151,6 +173,7 @@ export function SimulationProvider({
     const cooldownOk = Date.now() - crisisDismissedAt > 90000;
     if (critical && !crisisTimelineId && sessionAge > 20000 && cooldownOk && Math.random() < 0.2) {
       setCrisisTimelineId(critical.id);
+      if (soundEnabledRef.current) playCriticalTone();
     }
   }, [timelines, crisisTimelineId, crisisDismissedAt]);
 
@@ -160,6 +183,7 @@ export function SimulationProvider({
 
   const performAction = useCallback(
     (timelineId: string, action: ActionType, intensity: number) => {
+      if (soundEnabledRef.current) playBlip(520, 0.14, 0.09);
       setTimelines((prev) =>
         prev.map((tl) => {
           if (tl.id !== timelineId) return tl;
@@ -199,7 +223,10 @@ export function SimulationProvider({
       const target =
         (timelineId && timelines.find((t) => t.id === timelineId)) ||
         [...timelines].sort((a, b) => a.stability - b.stability)[0];
-      if (target) setCrisisTimelineId(target.id);
+      if (target) {
+        setCrisisTimelineId(target.id);
+        if (soundEnabledRef.current) playCriticalTone();
+      }
     },
     [timelines]
   );
@@ -213,6 +240,14 @@ export function SimulationProvider({
     (id: string | null) => timelines.find((t) => t.id === id),
     [timelines]
   );
+
+  const toggleSound = useCallback(() => {
+    setSoundEnabled((s) => !s);
+  }, []);
+
+  const toggleAmbient = useCallback(() => {
+    setAmbientEnabled((a) => !a);
+  }, []);
 
   const actionsToday = useMemo(() => {
     const startOfDay = new Date();
@@ -240,11 +275,15 @@ export function SimulationProvider({
     cycleNumber,
     operatorRank,
     nextRank,
+    soundEnabled,
+    ambientEnabled,
     selectTimeline,
     performAction,
     triggerCrisis,
     dismissCrisis,
     getTimeline,
+    toggleSound,
+    toggleAmbient,
   };
 
   return (

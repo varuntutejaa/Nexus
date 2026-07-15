@@ -24,14 +24,21 @@ export function formatClock(date: Date) {
 }
 
 export const STATUS_COLORS = {
-  stable: { text: "text-cyan", ring: "ring-cyan-400/40", hex: "#22d3ee", glow: "glow-cyan" },
-  atrisk: { text: "text-amber", ring: "ring-amber-400/40", hex: "#f59e0b", glow: "glow-amber" },
-  critical: { text: "text-red", ring: "ring-red-400/40", hex: "#ef4444", glow: "glow-red" },
+  stable: { text: "text-cyan", ring: "ring-cyan-400/40", hex: "#4FE3FF", glow: "glow-cyan" },
+  atrisk: { text: "text-amber", ring: "ring-amber-400/40", hex: "#FFB84D", glow: "glow-amber" },
+  critical: { text: "text-red", ring: "ring-red-400/40", hex: "#FF3B3B", glow: "glow-red" },
+} as const;
+
+export const TEAL_SUCCESS = {
+  text: "text-teal",
+  bg: "bg-teal/10",
+  border: "border-teal/30",
+  hex: "#3FE0A0",
 } as const;
 
 export const SEVERITY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   low: { bg: "bg-cyan/10", text: "text-cyan", border: "border-cyan/30" },
   medium: { bg: "bg-amber/10", text: "text-amber", border: "border-amber/30" },
-  high: { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-400/30" },
+  high: { bg: "bg-[#FF6B35]/10", text: "text-[#FF6B35]", border: "border-[#FF6B35]/30" },
   critical: { bg: "bg-red/10", text: "text-red", border: "border-red/30" },
 };

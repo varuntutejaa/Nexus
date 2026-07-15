@@ -4,7 +4,8 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, ShieldAlert, Wrench, X, Zap } from "lucide-react";
 import { useSimulation } from "@/lib/simulation-context";
-import { formatPopulation } from "@/lib/format";
+import { formatPopulation, TEAL_SUCCESS } from "@/lib/format";
+import HudCorners from "./HudCorners";
 
 export default function CrisisMode() {
   const { crisisTimelineId, getTimeline, dismissCrisis, performAction } = useSimulation();
@@ -62,7 +63,8 @@ export default function CrisisMode() {
               <X className="h-3.5 w-3.5" /> DISMISS
             </button>
 
-            <div className="animate-glitch-flicker rounded-xl border-2 border-red/50 bg-void/90 p-8 glow-red backdrop-blur-sm">
+            <div className="hud-corners animate-glitch-flicker relative rounded-xl border-2 border-red/50 bg-void/90 p-8 glow-red backdrop-blur-sm">
+              <HudCorners />
               <div className="mb-5 flex items-center gap-3 animate-shake">
                 <AlertTriangle className="h-9 w-9 text-red" />
                 <div>
@@ -113,7 +115,7 @@ export default function CrisisMode() {
                       ) : (
                         <Zap className="h-4 w-4" />
                       )}
-                      {resolving ? "DEPLOYING EMERGENCY PATCH..." : "EMERGENCY STABILIZE"}
+                      {resolving ? "PROCESSING..." : "EMERGENCY STABILIZE"}
                     </motion.button>
                     <button
                       onClick={dismissCrisis}
@@ -134,9 +136,9 @@ export default function CrisisMode() {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                    className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-cyan bg-cyan/10"
+                    className={`flex h-16 w-16 items-center justify-center rounded-full border-2 ${TEAL_SUCCESS.border} ${TEAL_SUCCESS.bg}`}
                   >
-                    <Wrench className="h-7 w-7 text-cyan" />
+                    <Wrench className={`h-7 w-7 ${TEAL_SUCCESS.text}`} />
                   </motion.div>
                   <div className="font-display text-lg font-semibold text-white">
                     Timeline Stabilized

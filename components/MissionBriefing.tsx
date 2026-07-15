@@ -115,7 +115,7 @@ export default function MissionBriefing({
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={onClose}
-                className="flex w-full items-center justify-center gap-2 rounded-md bg-gradient-to-r from-violet to-cyan py-2.5 text-sm font-semibold text-void transition cursor-pointer"
+                className="flex w-full items-center justify-center gap-2 rounded-md bg-gradient-to-r from-deep-blue to-cyan py-2.5 text-sm font-semibold text-void transition cursor-pointer"
               >
                 BEGIN OPERATIONS →
               </motion.button>

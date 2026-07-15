@@ -6,6 +6,7 @@ import { AlertCircle } from "lucide-react";
 import { useSimulation } from "@/lib/simulation-context";
 import { formatTimeAgo, SEVERITY_COLORS } from "@/lib/format";
 import type { Severity } from "@/lib/types";
+import HudCorners from "./HudCorners";
 
 const SEVERITIES: (Severity | "all")[] = ["all", "low", "medium", "high", "critical"];
 const SEVERITY_RANK: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 };
@@ -35,7 +36,8 @@ export default function AnomalyFeed({ limit }: { limit?: number }) {
   }
 
   return (
-    <div className="panel flex h-full flex-col p-4">
+    <div className="panel hud-corners relative flex h-full flex-col p-4">
+      <HudCorners />
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <AlertCircle className="h-4 w-4 text-violet" />
