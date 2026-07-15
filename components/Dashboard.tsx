@@ -15,30 +15,49 @@ import MissionBriefing from "./MissionBriefing";
 import RealityGlitch from "./RealityGlitch";
 import ContinuumTicker from "./ContinuumTicker";
 import RankUpToast from "./RankUpToast";
+import CommandPalette from "./CommandPalette";
 
 function DashboardContent() {
   const [tab, setTab] = useState<Tab>("overview");
   const [missionOpen, setMissionOpen] = useState(true);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const { triggerCrisis, selectTimeline, selectedTimelineId, crisisTimelineId, dismissCrisis } =
     useSimulation();
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
+        return;
+      }
       if (e.key !== "Escape") return;
-      if (missionOpen) setMissionOpen(false);
+      if (paletteOpen) setPaletteOpen(false);
+      else if (missionOpen) setMissionOpen(false);
       else if (selectedTimelineId) selectTimeline(null);
       else if (crisisTimelineId) dismissCrisis();
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [missionOpen, selectedTimelineId, crisisTimelineId, selectTimeline, dismissCrisis]);
+  }, [paletteOpen, missionOpen, selectedTimelineId, crisisTimelineId, selectTimeline, dismissCrisis]);
 
   return (
     <div className="relative z-10 flex min-h-screen flex-col">
       <RealityGlitch />
       <RankUpToast />
       <MissionBriefing open={missionOpen} onClose={() => setMissionOpen(false)} />
-      <Header onCrisis={() => triggerCrisis()} onMission={() => setMissionOpen(true)} />
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        onNavigate={setTab}
+        onMission={() => setMissionOpen(true)}
+        onCrisis={() => triggerCrisis()}
+      />
+      <Header
+        onCrisis={() => triggerCrisis()}
+        onMission={() => setMissionOpen(true)}
+        onSearch={() => setPaletteOpen(true)}
+      />
       <ContinuumTicker />
 
       <div className="flex flex-1 flex-col gap-0 p-4 md:flex-row md:gap-4">
@@ -82,7 +101,7 @@ function DashboardContent() {
       <CrisisMode />
 
       <AnimatePresence>
-        {(missionOpen || selectedTimelineId || crisisTimelineId) && (
+        {(missionOpen || selectedTimelineId || crisisTimelineId || paletteOpen) && (
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}

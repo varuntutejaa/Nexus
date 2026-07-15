@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ShieldCheck, Fingerprint } from "lucide-react";
+import DecorativeMap from "./DecorativeMap";
 
 export default function LoginScreen({
   onAuthenticate,
@@ -30,11 +31,29 @@ export default function LoginScreen({
       <div className="bg-starfield" />
       <div className="bg-grid" />
       <div className="bg-noise" />
+      <div className="absolute inset-0 opacity-40">
+        <DecorativeMap />
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-b from-void/30 via-void/60 to-void" />
+
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="absolute top-[14%] z-10 flex flex-col items-center text-center"
+      >
+        <div className="font-display text-2xl font-bold tracking-[0.15em] text-white text-glow-violet">
+          NEXUS
+        </div>
+        <span className="mt-2 rounded-full border border-violet/30 bg-violet/10 px-3 py-1 text-[9px] tracking-[0.3em] text-lavender">
+          REALITY REIMAGINED — BEYOND REALITY
+        </span>
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 16, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
         className="panel glow-violet relative z-10 w-full max-w-sm p-8"
       >
         <div className="mb-6 flex flex-col items-center text-center">

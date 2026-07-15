@@ -125,6 +125,13 @@ body {
   backdrop-filter: blur(10px);
 }
 
+.panel-solid {
+  background: linear-gradient(180deg, rgba(15, 12, 31, 0.99), rgba(11, 9, 24, 0.99));
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+}
+
 .glow-violet {
   box-shadow: 0 0 24px -6px rgba(139, 92, 246, 0.45);
 }

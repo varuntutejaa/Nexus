@@ -31,7 +31,7 @@ export default function MissionBriefing({
             transition={{ type: "spring", damping: 26, stiffness: 260 }}
             className="fixed left-1/2 top-1/2 z-[91] w-[92vw] max-w-xl -translate-x-1/2 -translate-y-1/2"
           >
-            <div className="panel glow-violet max-h-[85vh] overflow-y-auto p-7">
+            <div className="panel-solid glow-violet max-h-[85vh] overflow-y-auto p-7">
               <div className="mb-5 flex items-start justify-between">
                 <div>
                   <div className="text-[10px] tracking-[0.35em] text-violet">

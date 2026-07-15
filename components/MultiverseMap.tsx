@@ -4,7 +4,13 @@ import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useSimulation } from "@/lib/simulation-context";
 import { STATUS_COLORS } from "@/lib/format";
-import type { Timeline } from "@/lib/types";
+import type { StabilityStatus, Timeline } from "@/lib/types";
+
+const LEGEND: { status: StabilityStatus; label: string }[] = [
+  { status: "stable", label: "Stable" },
+  { status: "atrisk", label: "At Risk" },
+  { status: "critical", label: "Critical" },
+];
 
 function hash(str: string, seed: number) {
   let h = seed;
@@ -26,6 +32,7 @@ function nodePosition(tl: Timeline) {
 export default function MultiverseMap({ compact = false }: { compact?: boolean }) {
   const { timelines, selectTimeline, selectedTimelineId } = useSimulation();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<StabilityStatus | "all">("all");
 
   const positioned = useMemo(
     () =>
@@ -53,6 +60,8 @@ export default function MultiverseMap({ compact = false }: { compact?: boolean }
         {/* branch lines */}
         {positioned.map(({ tl, x, y }) => {
           const colors = STATUS_COLORS[tl.status];
+          const dimmed = filter !== "all" && tl.status !== filter;
+          const baseOpacity = tl.status === "critical" ? 0.35 : 0.14;
           return (
             <line
               key={`line-${tl.id}`}
@@ -62,7 +71,7 @@ export default function MultiverseMap({ compact = false }: { compact?: boolean }
               y2={y}
               stroke={colors.hex}
               strokeWidth={tl.status === "critical" ? 1.4 : 0.8}
-              strokeOpacity={tl.status === "critical" ? 0.35 : 0.14}
+              strokeOpacity={dimmed ? baseOpacity * 0.25 : baseOpacity}
               strokeDasharray={tl.status === "atrisk" ? "4 5" : undefined}
             />
           );
@@ -98,11 +107,17 @@ export default function MultiverseMap({ compact = false }: { compact?: boolean }
           const isSelected = tl.id === selectedTimelineId;
           const isHovered = tl.id === hoveredId;
           const baseR = compact ? 5 + tl.depth * 0.6 : 6 + tl.depth * 0.8;
+          const dimmed = filter !== "all" && tl.status !== filter;
           return (
             <motion.g
               key={tl.id}
-              animate={{ x: [0, dx, 0], y: [0, dy, 0] }}
-              transition={{ duration, repeat: Infinity, ease: "easeInOut" }}
+              initial={{ opacity: 1 }}
+              animate={{ x: [0, dx, 0], y: [0, dy, 0], opacity: dimmed ? 0.18 : 1 }}
+              transition={{
+                x: { duration, repeat: Infinity, ease: "easeInOut" },
+                y: { duration, repeat: Infinity, ease: "easeInOut" },
+                opacity: { duration: 0.3 },
+              }}
               style={{ cursor: "pointer" }}
               onClick={() => selectTimeline(tl.id)}
               onMouseEnter={() => setHoveredId(tl.id)}
@@ -178,6 +193,38 @@ export default function MultiverseMap({ compact = false }: { compact?: boolean }
           );
         })}
       </svg>
+
+      {!compact && (
+        <div className="absolute bottom-2 left-2 flex flex-wrap items-center gap-1.5 rounded-md border border-white/10 bg-void-raised/80 px-2.5 py-1.5 backdrop-blur-sm">
+          <button
+            onClick={() => setFilter("all")}
+            className={`rounded px-2 py-0.5 text-[9px] tracking-wide transition cursor-pointer ${
+              filter === "all" ? "bg-white/15 text-white" : "text-lavender-dim hover:text-lavender"
+            }`}
+          >
+            ALL
+          </button>
+          {LEGEND.map(({ status, label }) => {
+            const colors = STATUS_COLORS[status];
+            const isActive = filter === status;
+            return (
+              <button
+                key={status}
+                onClick={() => setFilter(isActive ? "all" : status)}
+                className={`flex items-center gap-1.5 rounded px-2 py-0.5 text-[9px] tracking-wide transition cursor-pointer ${
+                  isActive ? "bg-white/15 text-white" : "text-lavender-dim hover:text-lavender"
+                }`}
+              >
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: colors.hex, boxShadow: `0 0 4px ${colors.hex}` }}
+                />
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

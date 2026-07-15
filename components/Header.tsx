@@ -1,20 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, BookOpen, Radio } from "lucide-react";
+import { AlertTriangle, BookOpen, Radio, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import AnimatedNumber from "./AnimatedNumber";
 import { formatClock, STATUS_COLORS } from "@/lib/format";
 import { useSimulation } from "@/lib/simulation-context";
+import NotificationBell from "./NotificationBell";
 
 export default function Header({
   onCrisis,
   onMission,
+  onSearch,
 }: {
   onCrisis: () => void;
   onMission: () => void;
+  onSearch: () => void;
 }) {
-  const { operatorName, overallStability, timelines, anomalies, operatorRank } = useSimulation();
+  const { operatorName, overallStability, timelines, anomalies, operatorRank, selectTimeline } =
+    useSimulation();
   const [now, setNow] = useState<Date | null>(() => new Date());
   const [ping, setPing] = useState(false);
   const prevAnomalyCount = useRef(anomalies.length);
@@ -87,7 +91,18 @@ export default function Header({
         </span>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onSearch}
+          className="hidden items-center gap-2 rounded-md border border-white/10 px-2.5 py-1.5 text-[10px] tracking-widest text-lavender-dim transition hover:border-violet/40 hover:text-white cursor-pointer md:flex"
+        >
+          <Search className="h-3 w-3" />
+          SEARCH
+          <kbd className="rounded border border-white/10 px-1 py-0.5 text-[9px]">⌘K</kbd>
+        </button>
+
+        <NotificationBell onJumpToTimeline={(id) => selectTimeline(id)} />
+
         <button
           onClick={onCrisis}
           className="flex items-center gap-1.5 rounded-md border border-red/40 bg-red/10 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-red transition hover:bg-red/20 cursor-pointer"
